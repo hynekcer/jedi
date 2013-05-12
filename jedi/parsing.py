@@ -516,10 +516,8 @@ class Parser(object):
             # import stuff
             elif tok == 'import':
                 imports = self._parse_import_list()
-                for count, (m, alias, defunct) in enumerate(imports):
-                    e = (alias or m or self).end_pos
-                    end_pos = self.end_pos if count + 1 == len(imports) else e
-                    i = pr.Import(self.module, first_pos, end_pos, m,
+                for m, alias, defunct in imports:
+                    i = pr.Import(self.module, first_pos, self.end_pos, m,
                                                 alias, defunct=defunct)
                     self._check_user_stmt(i)
                     self.scope.add_import(i)
@@ -553,7 +551,12 @@ class Parser(object):
                     star = name is not None and name.names[0] == '*'
                     if star:
                         name = None
-                    e = (alias or name or self).end_pos
+                    if alias is not None:
+                        e = alias.end_pos
+                    elif name is not None:
+                        e = name.end_pos
+                    else:
+                        e = self.end_pos
                     end_pos = self.end_pos if count + 1 == len(names) else e
                     i = pr.Import(self.module, first_pos, end_pos, name,
                                         alias, mod, star, relative_count,

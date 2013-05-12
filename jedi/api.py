@@ -20,6 +20,7 @@ from jedi import helpers
 from jedi import common
 from jedi import cache
 from jedi import modules
+from jedi import lazy_import_api
 from jedi._compatibility import next, unicode
 import evaluate
 import keywords
@@ -555,3 +556,5 @@ def _quick_complete(source):
     pos = len(lines), len(lines[-1])
     script = Script(source, pos[0], pos[1], '')
     return script.completions()
+
+lazy_import_api()

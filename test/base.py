@@ -4,20 +4,18 @@ if sys.hexversion < 0x02070000:
 else:
     import unittest
 import os
-from os.path import abspath, dirname
+from os.path import dirname
 import functools
 
-import jedi
-
-
-test_dir = dirname(abspath(__file__))
-root_dir = dirname(test_dir)
+from . import root_dir, test_dir
+import jedi.api
 
 
 sample_int = 1  # This is used in completion/imports.py
 
 
 class TestBase(unittest.TestCase):
+    import jedi
     def get_script(self, src, pos, path=None):
         if pos is None:
             lines = src.splitlines()

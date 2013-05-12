@@ -1,22 +1,28 @@
+import logging
+import traceback
+import sys
+logging.warn('\nstart conftest %s' % [k for k, v in sorted(sys.modules.items()) if v and 'jedi' in k])
+logging.warn(__name__ + '\n' + ''.join(traceback.format_stack()))
+
 import os
 import shutil
 import tempfile
 
 import pytest
 
-from . import base
-from . import run
-from . import refactor
-
+from . import test_dir
 
 def pytest_addoption(parser):
+
+    logging.warn('\nstart pytest_addoption %s' % [k for k, v in sorted(sys.modules.items()) if v and 'jedi' in k])
+    logging.warn(__name__ + '\n' + ''.join(traceback.format_stack()))
     parser.addoption(
         "--integration-case-dir",
-        default=os.path.join(base.test_dir, 'completion'),
+        default=os.path.join(test_dir, 'completion'),
         help="Directory in which integration test case files locate.")
     parser.addoption(
         "--refactor-case-dir",
-        default=os.path.join(base.test_dir, 'refactor'),
+        default=os.path.join(test_dir, 'refactor'),
         help="Directory in which refactoring test case files locate.")
     parser.addoption(
         "--test-files", "-T", default=[], action='append',
@@ -27,6 +33,7 @@ def pytest_addoption(parser):
     parser.addoption(
         "--thirdparty", action='store_true',
         help="Include integration tests that requires third party modules.")
+    logging.warn('end pytest_addoption %s\n' % [k for k, v in sorted(sys.modules.items()) if v and 'jedi' in k])
 
 
 def parse_test_files_option(opt):
@@ -36,6 +43,8 @@ def parse_test_files_option(opt):
     >>> parse_test_files_option('generators.py:10,13,19')
     ('generators.py', [10, 13, 19])
     """
+    logging.warn(__name__ + '\n' + ''.join(traceback.format_stack()))
+    from . import base, run, refactor
     opt = str(opt)
     if ':' in opt:
         (f_name, rest) = opt.split(':', 1)
@@ -48,6 +57,8 @@ def pytest_generate_tests(metafunc):
     """
     :type metafunc: _pytest.python.Metafunc
     """
+    logging.warn(__name__ + '\n' + ''.join(traceback.format_stack()))
+    from . import base, run, refactor
     test_files = dict(map(parse_test_files_option,
                           metafunc.config.option.test_files))
     if 'case' in metafunc.fixturenames:
@@ -73,6 +84,8 @@ def isolated_jedi_cache(monkeypatch, tmpdir):
     Same as `clean_jedi_cache`, but create the temporary directory for
     each test case (scope='function').
     """
+    logging.warn(__name__ + '\n' + ''.join(traceback.format_stack()))
+    from . import base, run, refactor
     settings = base.jedi.settings
     monkeypatch.setattr(settings, 'cache_directory', str(tmpdir))
 
@@ -88,6 +101,8 @@ def clean_jedi_cache(request):
 
     This fixture is activated in ../pytest.ini.
     """
+    logging.warn(__name__ + '\n' + ''.join(traceback.format_stack()))
+    from . import base, run, refactor
     settings = base.jedi.settings
     old = settings.cache_directory
     tmp = tempfile.mkdtemp(prefix='jedi-test-')
@@ -97,3 +112,5 @@ def clean_jedi_cache(request):
     def restore():
         settings.cache_directory = old
         shutil.rmtree(tmp)
+
+logging.warn('end conftest %s\n' % [k for k, v in sorted(sys.modules.items()) if v and 'jedi' in k])

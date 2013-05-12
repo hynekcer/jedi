@@ -33,6 +33,16 @@ date
 As you see Jedi is pretty simple and allows you to concentrate on writing a
 good text editor, while still having very good IDE features for Python.
 """
+import logging
+import traceback
+import sys
+logging.basicConfig(filename='log')
+logging.warn(__name__ + '\n' + ''.join(traceback.format_stack()))
+if False:
+    sys.stdin.close(); sys.stdin = open('/dev/pts/8', 'r');
+    sys.stdout.close(); sys.stdout = open('/dev/pts/8', 'a');
+    sys.stderr.close(); sys.stderr = open('/dev/pts/8', 'a');
+    import pdb; pdb.set_trace()
 
 __version__ = 0, 6, 0
 
@@ -42,7 +52,16 @@ import sys
 # imports and circular imports... Just avoid it:
 sys.path.insert(0, __path__[0])
 
-from .api import Script, NotFoundError, set_debug_function, _quick_complete
+#from .api import Script, NotFoundError, set_debug_function, _quick_complete
 from . import settings
 
 sys.path.pop(0)
+
+def lazy_import_api():
+    import api
+    import jedi
+    for name in ('Script', 'NotFoundError', 'set_debug_function', '_quick_complete'):
+        setattr(sys.modules['jedi'], name, getattr(api, name))
+
+logging.warn('end jedi/__init__')
+logging.warn([k for k, v in sorted(sys.modules.items()) if v and 'jedi' in k])

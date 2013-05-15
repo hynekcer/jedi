@@ -36,17 +36,22 @@ good text editor, while still having very good IDE features for Python.
 
 __version__ = 0, 6, 0
 
+import sys
 from functools import partial
 
 from . import settings
 from .errors import NotFoundError
 
+_api = None
 
-def lazy_import_api_call(fname, *args, **kwargs):
-    from . import api
-    for name in ['Script', 'set_debug_function', '_quick_complete']:
-        globals()[name] = getattr(api, name)
-    return globals()[fname](*args, **kwargs)
+def lazy_import_api_call(name, *args, **kwargs):
+    global _api
+    if not _api:
+        sys.path.insert(0, __path__[0])
+        import api
+        sys.path.pop(0)
+        _api = api
+    return getattr(_api, name)(*args, **kwargs)
 
 # These names are imported lazy and replaced later by jedi.api objects.
 # If the __doc__ string is important, any of these objects should be used
